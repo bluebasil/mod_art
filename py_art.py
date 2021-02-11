@@ -1,5 +1,5 @@
 import sys, pygame, math
-import pi_calculator
+import pi_calculator, screen_management
 import argparse
 
 parser = argparse.ArgumentParser(description='Calculates pi in any base, and makes artistic fractals')
@@ -22,15 +22,18 @@ hue_change_speed = 360/number_of_digits if number_of_digits is not math.inf else
 lum_change_speed = 90/number_of_digits if number_of_digits is not math.inf else 0
 
 
-screen = pygame.display.set_mode(size,pygame.RESIZABLE)
+#screen = pygame.display.set_mode(size,pygame.RESIZABLE)
+sm = screen_management.Display()
+screen = sm.get_drawing_surface()
+#fake_screen = screen.copy()
 clock = pygame.time.Clock()
+#screen.blit(pygame.transform.scale(fake_screen, size), (0, 0))
 
-
-screen.fill(current_col)
+#screen.fill(current_col)
 
 pi_calc = pi_calculator.PiCalculator()
 
-current_pos = width/2, height/2
+current_pos = (0,0)
 
 log_base = math.ceil(math.log(base, 10))+1
 
@@ -43,52 +46,38 @@ current_lum = 10 if number_of_digits is not math.inf else 50
 current_col.hsla = (current_hue, 100, current_lum, 100)
 while i < number_of_digits:
 
-    # pi = pi_calc.get_next_digit(base=base)
-    # character = pi[i]
-    # print(character, end="", flush=True)
-    # digit = int(character, base)
 
     digit = pi_calc.get_next_digit(base=base)
-    if base<= 36:
+
+    # We can only print out PI in base 36 or less.  Otherwise we instead print the number of each character
+    if base <= 36:
         print(characters[digit], end="", flush=True)
     else:
         print(f"{digit:{int(log_base)}}", end="", flush=True)
 
     i += 1
-
     last_pos = current_pos
 
     rotation = -digit*2*math.pi/base - math.pi
 
-    current_pos = current_pos[0]+math.sin(rotation)*spacing, current_pos[1]+math.cos(rotation)*spacing,
-    pygame.draw.line(screen, current_col, last_pos, current_pos, 3)
-
-    pygame.display.flip()
+    current_pos = current_pos[0]+math.sin(rotation)*spacing, current_pos[1]+math.cos(rotation)*spacing
+    sm.get_point(last_pos)
+    pygame.draw.line(sm.get_drawing_surface(), current_col, sm.get_point(last_pos), sm.get_point(current_pos), 3)
+    #pygame.draw.line(sm.get_drawing_surface(), current_col, last_pos, current_pos, 3)
+    # 3width*=1.01
+    # height*=1.01
+    # size=int(width),int(height)
+    #screen.blit(pygame.transform.scale(screen, size), (0, 0))
+    #pygame.display.flip()
 
     h,s,l,a = current_col.hsla
     current_hue = (current_hue+hue_change_speed)%360
     current_lum = (current_lum+lum_change_speed)%360
     current_col.hsla = current_hue,s,current_lum,a
 
+    sm.tick()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
 
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
-# ball = pygame.image.load("intro_ball.gif")
-# ballrect = ball.get_rect()
-#
-#
-#
-#     ballrect = ballrect.move(speed)
-#     if ballrect.left < 0 or ballrect.right > width:
-#         speed[0] = -speed[0]
-#     if ballrect.top < 0 or ballrect.bottom > height:
-#         speed[1] = -speed[1]
-#
-#     screen.fill(black)
-#     screen.blit(ball, ballrect)
-#     pygame.draw.line(screen,current_col,(0,0),(100,100),5)
-#     pygame.display.flip()
+    sm.tick()
+

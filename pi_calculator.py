@@ -11,8 +11,11 @@ class PiCalculator:
 
     def get_next_digit(self, base=6):
         self.decimal += 1
+        print(self.q, self.r, self.t, self.k, self.n, self.l)
 
         while self.counter != self.decimal + 1:
+            print(self.q, self.r, self.t, self.k, self.n, self.l)
+            print("^^^")
             if 4 * self.q + self.r - self.t < self.n * self.t:
                 # yield digit
                 next_digit = self.n
