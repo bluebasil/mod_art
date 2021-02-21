@@ -80,4 +80,3 @@ while i < number_of_digits:
 
 while True:
     sm.tick()
-
